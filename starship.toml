@@ -1,0 +1,40 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = '$custom$status$cmd_duration[](blue)$directory$git_branch[](blue) '
+
+palette = 'default'
+
+[palettes.default]
+blue = '#75d3ff'
+green = '#b6e875'
+white = '#191919'
+
+
+[custom.sandbox]
+command = 'echo Sandbox'
+when = 'true'
+format = '[](green)[$output](fg:black bg:green)[](green) '
+shell = ['sh']
+
+[cmd_duration]
+min_time = 2_000
+format = '[](yellow)[⏲ $duration](fg:black bg:yellow)[](yellow) '
+
+[directory]
+format = '[$path ]($style)'
+style = 'bg:blue fg:white'
+
+[status]
+disabled = false
+format = '[](red)[⨯ $status](fg:black bg:red)[](red) '
+symbol = ''
+not_executable_symbol = ''
+not_found_symbol = ''
+sigint_symbol = ''
+signal_symbol = ''
+
+[git_branch]
+format = '[  $branch ](fg:yellow bg:blue)'
+symbol = ''
+truncation_length = 32
+truncation_symbol = '…'

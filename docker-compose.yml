@@ -1,0 +1,55 @@
+services:
+  claude-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        TZ: ${TZ}
+        USERNAME: ${USERNAME}
+        NVM_VERSION: ${NVM_VERSION}
+        CLAUDE_CODE_VERSION: ${CLAUDE_CODE_VERSION}
+        EAS_CLI_VERSION: ${EAS_CLI_VERSION}
+        GIT_DELTA_VERSION: ${GIT_DELTA_VERSION}
+        GO_VERSION: ${GO_VERSION}
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - NODE_OPTIONS
+      - CLAUDE_CONFIG_DIR
+      - POWERLEVEL9K_DISABLE_GITSTATUS
+      - GITHUB_PERSONAL_ACCESS_TOKEN
+      - ANTHROPIC_API_KEY
+      - TERM
+      - BROWSER
+      - LANG
+      - LC_ALL
+      - SHELL
+      - EDITOR
+      - VISUAL
+    user: ${USERNAME}
+    working_dir: /home/${USERNAME}
+    volumes:
+      # Code directory
+      - ~/Code:/home/${USERNAME}/Code:delegated
+      # Zsh config
+      - ~/.zshrc:/home/${USERNAME}/.zshrc:ro
+      - ~/.zshenv:/home/${USERNAME}/.zshenv:ro
+      - ~/.zsh:/home/${USERNAME}/.zsh:ro
+      # Git config
+      - ~/.gitconfig:/home/${USERNAME}/.gitconfig:ro
+      - ~/.gitconfig-karaconnect:/home/${USERNAME}/.gitconfig-karaconnect:ro
+      # GitHub CLI config
+      - ~/.config/gh:/home/${USERNAME}/.config/gh:ro
+      # SSH config and keys
+      - ~/.ssh:/home/${USERNAME}/.ssh:ro
+      # Persistent volumes
+      - claude-config:/home/${USERNAME}/.claude
+      - claude-karaconnect-config:/home/${USERNAME}/.claude-karaconnect
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/zsh"]
+
+volumes:
+  claude-config:
+  claude-karaconnect-config:
