@@ -11,6 +11,7 @@ services:
         EAS_CLI_VERSION: ${EAS_CLI_VERSION}
         GIT_DELTA_VERSION: ${GIT_DELTA_VERSION}
         GO_VERSION: ${GO_VERSION}
+    restart: unless-stopped
     cap_add:
       - NET_ADMIN
       - NET_RAW

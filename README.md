@@ -1,12 +1,13 @@
 # Claude Code Sandbox
 
-A Docker Compose setup for running [Claude Code](https://github.com/anthropics/claude-code) in a sandboxed container with network firewall restrictions. Host machine configs (zsh, git, SSH, starship) are mounted in so the container feels like home.
+A Docker Compose setup for running [Claude Code](https://github.com/anthropics/claude-code) in a sandboxed container with network firewall restrictions. Based on the [official Anthropic devcontainer setup](https://github.com/anthropics/claude-code/tree/main/.devcontainer), but heavily modified to accommodate my personal dotfiles, toolchain preferences, and a standalone Docker Compose workflow instead of VS Code devcontainers. Host machine configs (zsh, git, SSH, GitHub CLI) are mounted in so the container feels like home.
 
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - `~/Code` directory on your host machine
-- SSH keys, git, zsh, and starship configs in their standard locations (`~/.ssh`, `~/.gitconfig`, `~/.zshrc`, etc.)
+- SSH keys, git, zsh, and GitHub CLI configs in their standard locations (`~/.ssh`, `~/.gitconfig`, `~/.zshrc`, etc.)
+- A terminal with a [Nerd Font](https://www.nerdfonts.com/) installed for Starship prompt glyphs
 
 ## Quick Start
 
@@ -21,32 +22,67 @@ docker compose exec claude-sandbox zsh
 docker compose exec claude-sandbox claude
 ```
 
-## Stopping
+## Authentication
 
-```bash
-# Stop the container
-docker compose down
+The container is headless, so browser-based OAuth login will not work. To authenticate Claude Code, either:
 
-# Stop and remove volumes (wipes bash history and Claude config)
-docker compose down -v
-```
+1. **API key** — set `ANTHROPIC_API_KEY` in your `.env` file or export it on your host
+2. **Mount host config** — replace the `claude-config` named volume with a bind mount of `~/.claude` from your host
 
-## Rebuilding
+## Configuration
 
-After modifying the `Dockerfile` or to pick up a new Claude Code version:
+All configuration is managed through the `.env` file:
 
-```bash
-docker compose up -d --build --force-recreate --remove-orphans
-```
+### Build args
+
+| Variable | Default | Description |
+|---|---|---|
+| `TZ` | `America/Los_Angeles` | Container timezone |
+| `USERNAME` | `sophie` | Container user |
+| `NVM_VERSION` | `0.40.4` | nvm version |
+| `CLAUDE_CODE_VERSION` | `latest` | Claude Code version |
+| `EAS_CLI_VERSION` | `latest` | EAS CLI version |
+| `GIT_DELTA_VERSION` | `0.18.2` | git-delta version |
+| `GO_VERSION` | `1.24.1` | Go version |
+
+### Runtime environment
+
+| Variable | Default | Description |
+|---|---|---|
+| `NODE_OPTIONS` | `--max-old-space-size=4096` | Node.js memory limit |
+| `CLAUDE_CONFIG_DIR` | `/home/sophie/.claude` | Claude config path |
+| `POWERLEVEL9K_DISABLE_GITSTATUS` | `true` | Disable Powerlevel10k git status |
+| `LANG` / `LC_ALL` | `en_US.UTF-8` | Locale |
+| `SHELL` | `/bin/zsh` | Default shell |
+| `EDITOR` / `VISUAL` | `vim` | Default editor |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | — | GitHub PAT (set on host) |
+| `ANTHROPIC_API_KEY` | — | Anthropic API key (set on host) |
 
 ## What's Inside
 
-- **Debian Trixie** base image
-- **Node.js 20** and **Bun** runtimes
+### Runtimes
+- **Node.js** (LTS via nvm)
+- **Bun**
+- **Go** 1.24.1
+- **Rust** (nightly via rustup)
+
+### Tools
 - **Claude Code** (`@anthropic-ai/claude-code`)
-- **zsh** with Powerlevel10k theme, fzf, and git integration
+- **EAS CLI** (`eas-cli`)
 - **git-delta** for better diffs
-- **Network firewall** restricting outbound traffic to GitHub, npm, Anthropic API, and a few other allowed domains
+- **zoxide** (smarter `cd`)
+- **eza** (modern `ls`)
+- **fzf** (fuzzy finder)
+- **Starship** prompt with custom sandbox config
+- **GitHub CLI** (`gh`)
+
+### Shell
+- **zsh** with:
+  - zsh-autosuggestions
+  - zsh-syntax-highlighting
+  - zsh-autocomplete
+- **FiraCode Nerd Font** for glyph rendering
+- **vim** with syntax highlighting enabled
 
 ## Mounted Host Configs
 
@@ -56,23 +92,21 @@ docker compose up -d --build --force-recreate --remove-orphans
 | `~/.zshrc` | `/home/sophie/.zshrc` | read-only |
 | `~/.zshenv` | `/home/sophie/.zshenv` | read-only |
 | `~/.zsh` | `/home/sophie/.zsh` | read-only |
-| `~/.zsh_history` | `/home/sophie/.zsh_history` | read-write |
 | `~/.gitconfig` | `/home/sophie/.gitconfig` | read-only |
 | `~/.gitconfig-karaconnect` | `/home/sophie/.gitconfig-karaconnect` | read-only |
 | `~/.config/gh` | `/home/sophie/.config/gh` | read-only |
 | `~/.ssh` | `/home/sophie/.ssh` | read-only |
-| `~/.config/starship.toml` | `/home/sophie/.config/starship.toml` | read-only |
 
 Config files are mounted read-only to prevent the container from modifying your host configs.
 
 ## Persistent Volumes
 
-- **bash-history** — shell history persists across container restarts
 - **claude-config** — Claude Code settings and auth persist across container restarts
+- **claude-karaconnect-config** — Claude Karaconnect config persistence
 
 ## Firewall
 
-The container runs a firewall script (`init-firewall.sh`) on startup that restricts outbound network access to only:
+The container includes a firewall script (`init-firewall.sh`) that restricts outbound network access to only:
 
 - GitHub (API, web, git)
 - npm registry
@@ -86,4 +120,22 @@ To activate the firewall manually inside the container:
 
 ```bash
 sudo /usr/local/bin/init-firewall.sh
+```
+
+## Stopping
+
+```bash
+# Stop the container
+docker compose down
+
+# Stop and remove volumes (wipes Claude config)
+docker compose down -v
+```
+
+## Rebuilding
+
+After modifying the `Dockerfile`, `.env`, or to pick up new tool versions:
+
+```bash
+docker compose up -d --build --force-recreate --remove-orphans
 ```
