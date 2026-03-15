@@ -20,11 +20,11 @@ services:
       - BROWSER
       - CLAUDE_CONFIG_DIR
       - EDITOR
+      - GH_TOKEN
       - GITHUB_PERSONAL_ACCESS_TOKEN
       - LANG
       - LC_ALL
       - NODE_OPTIONS
-      - POWERLEVEL9K_DISABLE_GITSTATUS
       - SHELL
       - SOPHIE_CLAUDE_SANDBOX
       - TERM
@@ -41,17 +41,15 @@ services:
       # Git config
       - ~/.gitconfig:/home/${USERNAME}/.gitconfig:ro
       - ~/.gitconfig-karaconnect:/home/${USERNAME}/.gitconfig-karaconnect:ro
-      # GitHub CLI config
-      - ~/.config/gh:/home/${USERNAME}/.config/gh:ro
       # SSH config and keys
       - ~/.ssh:/home/${USERNAME}/.ssh:ro
       # Persistent volumes
-      - claude-config:/home/${USERNAME}/.claude
-      - claude-karaconnect-config:/home/${USERNAME}/.claude-karaconnect
+      - ~/.claude-sandbox:/home/${USERNAME}/.claude
+      - ~/.claude-karaconnect-sandbox:/home/${USERNAME}/.claude-karaconnect
+      - gh-config:/home/${USERNAME}/.config/gh
     stdin_open: true
     tty: true
     entrypoint: ["/bin/zsh"]
 
 volumes:
-  claude-config:
-  claude-karaconnect-config:
+  gh-config:

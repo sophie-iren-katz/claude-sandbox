@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   man-db \
   unzip \
   gnupg2 \
-  gh \
   iptables \
   ipset \
   iproute2 \
@@ -36,6 +35,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && apt-get clean && rm -rf /var/lib/apt/lists/* \
   && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
+# Install GitHub CLI from official repository
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+  | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+  apt-get update && apt-get install -y gh && \
+  apt-get clean && rm -rf /var/lib/apt/lists/*
+
 ARG LANG=en_US.UTF-8
 ARG LC_ALL=en_US.UTF-8
 ENV LANG=${LANG}
@@ -46,11 +53,6 @@ RUN mkdir -p /usr/local/share/fonts && \
   curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.tar.xz \
   | tar -xJ -C /usr/local/share/fonts && \
   fc-cache -f
-
-# Install zsh plugins
-RUN git clone https://github.com/zsh-users/zsh-autosuggestions /usr/local/share/zsh-autosuggestions && \
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting /usr/local/share/zsh-syntax-highlighting && \
-  git clone https://github.com/marlonrichert/zsh-autocomplete /usr/local/share/zsh-autocomplete
 
 # Create user and group
 RUN groupadd --gid 1000 ${USERNAME} && \
@@ -94,10 +96,6 @@ ENV GOPATH=/home/${USERNAME}/go
 # Install Rust/Cargo
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain nightly
 
-# Install zoxide, eza via cargo
-RUN . "/home/${USERNAME}/.cargo/env" && \
-  cargo install zoxide eza
-
 # Install git-delta
 ARG GIT_DELTA_VERSION=0.18.2
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -113,8 +111,9 @@ RUN echo "syntax on" > /home/${USERNAME}/.vimrc && chown ${USERNAME}:${USERNAME}
 RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} eas-cli@${EAS_CLI_VERSION}
 
 # Fix home directory ownership
-RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.claude-karaconnect && \
-  chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.local /home/${USERNAME}/.nvm /home/${USERNAME}/.bun /home/${USERNAME}/.cargo  /home/${USERNAME}/.npm  /home/${USERNAME}/.rustup /home/${USERNAME}/.claude  /home/${USERNAME}/.claude-karaconnect
+RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.claude-karaconnect /home/${USERNAME}/.config/gh && \
+  chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.bun /home/${USERNAME}/.cargo  /home/${USERNAME}/.npm  /home/${USERNAME}/.config/gh  /home/${USERNAME}/.claude  /home/${USERNAME}/.claude-karaconnect && \
+  chown ${USERNAME}:${USERNAME} /home/${USERNAME}/.local
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/

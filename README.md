@@ -20,6 +20,9 @@ docker compose exec claude-sandbox zsh
 
 # Run Claude Code directly
 docker compose exec claude-sandbox claude
+
+# Test workflow command
+docker compose down -v && docker compose up -d --build --remove-orphans && docker compose exec claude-sandbox zsh
 ```
 
 ## Stopping
@@ -105,8 +108,9 @@ All configuration is managed through the `.env` file:
 | `~/.zsh` | `/home/sophie/.zsh` | read-only |
 | `~/.gitconfig` | `/home/sophie/.gitconfig` | read-only |
 | `~/.gitconfig-karaconnect` | `/home/sophie/.gitconfig-karaconnect` | read-only |
-| `~/.config/gh` | `/home/sophie/.config/gh` | read-only |
 | `~/.ssh` | `/home/sophie/.ssh` | read-only |
+| `~/.claude-sandbox` | `/home/sophie/.claude-sandbox` | read-only |
+| `~/.claude-karaconnect-sandbox` | `/home/sophie/.claude-karaconnect-sandbox` | read-only |
 
 Config files are mounted read-only to prevent the container from modifying your host configs.
 
