@@ -22,12 +22,23 @@ docker compose exec claude-sandbox zsh
 docker compose exec claude-sandbox claude
 ```
 
-## Authentication
+## Stopping
 
-The container is headless, so browser-based OAuth login will not work. To authenticate Claude Code, either:
+```bash
+# Stop the container
+docker compose down
 
-1. **API key** — set `ANTHROPIC_API_KEY` in your `.env` file or export it on your host
-2. **Mount host config** — replace the `claude-config` named volume with a bind mount of `~/.claude` from your host
+# Stop and remove volumes (wipes Claude config)
+docker compose down -v
+```
+
+## Rebuilding
+
+After modifying the `Dockerfile`, `.env`, or to pick up new tool versions:
+
+```bash
+docker compose up -d --build --force-recreate --remove-orphans
+```
 
 ## Configuration
 
@@ -120,22 +131,4 @@ To activate the firewall manually inside the container:
 
 ```bash
 sudo /usr/local/bin/init-firewall.sh
-```
-
-## Stopping
-
-```bash
-# Stop the container
-docker compose down
-
-# Stop and remove volumes (wipes Claude config)
-docker compose down -v
-```
-
-## Rebuilding
-
-After modifying the `Dockerfile`, `.env`, or to pick up new tool versions:
-
-```bash
-docker compose up -d --build --force-recreate --remove-orphans
 ```

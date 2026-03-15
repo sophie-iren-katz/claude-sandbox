@@ -16,17 +16,18 @@ services:
       - NET_ADMIN
       - NET_RAW
     environment:
-      - NODE_OPTIONS
-      - CLAUDE_CONFIG_DIR
-      - POWERLEVEL9K_DISABLE_GITSTATUS
-      - GITHUB_PERSONAL_ACCESS_TOKEN
       - ANTHROPIC_API_KEY
-      - TERM
       - BROWSER
+      - CLAUDE_CONFIG_DIR
+      - EDITOR
+      - GITHUB_PERSONAL_ACCESS_TOKEN
       - LANG
       - LC_ALL
+      - NODE_OPTIONS
+      - POWERLEVEL9K_DISABLE_GITSTATUS
       - SHELL
-      - EDITOR
+      - SOPHIE_CLAUDE_SANDBOX
+      - TERM
       - VISUAL
     user: ${USERNAME}
     working_dir: /home/${USERNAME}
