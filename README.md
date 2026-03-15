@@ -16,10 +16,10 @@ A Docker Compose setup for running [Claude Code](https://github.com/anthropics/c
 docker compose up -d --build --remove-orphans
 
 # Shell into the container
-docker compose exec claude-sandbox zsh
+docker compose -p claude-sandbox exec claude-sandbox zsh
 
 # Run Claude Code directly
-docker compose exec claude-sandbox claude
+docker compose -p claude-sandbox exec claude-sandbox claude
 
 # Test workflow command
 docker compose down -v && docker compose up -d --build --remove-orphans && docker compose exec claude-sandbox zsh
