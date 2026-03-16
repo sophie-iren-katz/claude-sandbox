@@ -33,6 +33,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   locales \
   fontconfig \
   openssh-client \
+  bubblewrap \
+  socat \
+  libseccomp-dev \
   && apt-get clean && rm -rf /var/lib/apt/lists/* \
   && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
@@ -112,9 +115,27 @@ RUN echo "syntax on" > /home/${USERNAME}/.vimrc && chown ${USERNAME}:${USERNAME}
 RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} eas-cli@${EAS_CLI_VERSION}
 
 # Fix home directory ownership
-RUN mkdir -p /home/${USERNAME}/.claude /home/${USERNAME}/.claude-karaconnect /home/${USERNAME}/.config/gh && \
-  chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/.bun /home/${USERNAME}/.cargo  /home/${USERNAME}/.npm  /home/${USERNAME}/.config/gh  /home/${USERNAME}/.claude  /home/${USERNAME}/.claude-karaconnect && \
-  chown ${USERNAME}:${USERNAME} /home/${USERNAME}/.local
+#
+# I know this takes a while, but it is actually important
+RUN mkdir -p \
+    /home/${USERNAME}/.claude \
+    /home/${USERNAME}/.claude-karaconnect \
+    /home/${USERNAME}/.config/gh && \
+  chown -R ${USERNAME}:${USERNAME} \
+    /home/${USERNAME}/.bun \
+    /home/${USERNAME}/.cache \
+    /home/${USERNAME}/.cargo \
+    /home/${USERNAME}/.claude \
+    /home/${USERNAME}/.claude-karaconnect \
+    /home/${USERNAME}/.config/gh \
+    /home/${USERNAME}/.config/go \
+    /home/${USERNAME}/.local/go \
+    /home/${USERNAME}/.npm \
+    /home/${USERNAME}/.nvm \
+    /home/${USERNAME}/.rustup && \
+  chown ${USERNAME}:${USERNAME} \
+    /home/${USERNAME}/.config \
+    /home/${USERNAME}/.local
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/

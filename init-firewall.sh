@@ -67,6 +67,8 @@ done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 for domain in \
     "registry.npmjs.org" \
     "api.anthropic.com" \
+    "claude.ai" \
+    "cdn.claude.ai" \
     "sentry.io" \
     "statsig.anthropic.com" \
     "statsig.com" \
@@ -115,6 +117,9 @@ iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Then allow only specific outbound traffic to allowed domains
 iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
+
+# Log rejected outbound traffic for debugging (visible via dmesg)
+iptables -A OUTPUT -j LOG --log-prefix "FW-REJECT: " --log-level 4
 
 # Explicitly REJECT all other outbound traffic for immediate feedback
 iptables -A OUTPUT -j REJECT --reject-with icmp-admin-prohibited
