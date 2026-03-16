@@ -45,10 +45,18 @@ services:
       - ~/.gitconfig-karaconnect:/home/${USERNAME}/.gitconfig-karaconnect:ro
       # SSH config and keys
       - ~/.ssh:/home/${USERNAME}/.ssh:ro
+      # Host DNS aliases
+      - /etc/hosts:/etc/hosts.host:ro
+      # Package manager configs
+      - ~/.npmrc:/home/${USERNAME}/.npmrc:ro
+      - ~/.bunfig.toml:/home/${USERNAME}/.bunfig.toml:ro
       # Persistent volumes
       - ~/.claude-sandbox:/home/${USERNAME}/.claude
       - ~/.claude-karaconnect-sandbox:/home/${USERNAME}/.claude-karaconnect
       - gh-config:/home/${USERNAME}/.config/gh
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "host-machine.local:host-gateway"
     stdin_open: true
     tty: true
     entrypoint: ["/bin/zsh"]

@@ -2,6 +2,17 @@
 set -euo pipefail  # Exit on error, undefined vars, and pipeline failures
 IFS=$'\n\t'       # Stricter word splitting
 
+# 0. Merge host machine's /etc/hosts into the container's /etc/hosts
+if [ -f /etc/hosts.host ]; then
+    echo "Merging host DNS aliases..."
+    # Append host entries that aren't already present and skip localhost lines
+    grep -vE '^\s*#|^\s*$|localhost|host\.docker\.internal' /etc/hosts.host | while read -r line; do
+        if ! grep -qF "$line" /etc/hosts; then
+            echo "$line" >> /etc/hosts
+        fi
+    done
+fi
+
 # 1. Extract Docker DNS info BEFORE any flushing
 DOCKER_DNS_RULES=$(iptables-save -t nat | grep "127\.0\.0\.11" || true)
 
@@ -105,6 +116,10 @@ echo "Host network detected as: $HOST_NETWORK"
 # Set up remaining iptables rules
 iptables -A INPUT -s "$HOST_NETWORK" -j ACCEPT
 iptables -A OUTPUT -d "$HOST_NETWORK" -j ACCEPT
+
+# Redirect localhost traffic on common dev ports to the host machine
+# This makes localhost:PORT inside the container reach host services
+iptables -t nat -A OUTPUT -p tcp -d 127.0.0.1 --dport 1024:65535 -j DNAT --to-destination "$HOST_IP"
 
 # Set default policies to DROP first
 iptables -P INPUT DROP
