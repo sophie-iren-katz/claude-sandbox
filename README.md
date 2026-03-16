@@ -5,6 +5,7 @@ A Docker Compose setup for running [Claude Code](https://github.com/anthropics/c
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- [just](https://github.com/casey/just) command runner
 - `~/Code` directory on your host machine
 - SSH keys, git, zsh, and GitHub CLI configs in their standard locations (`~/.ssh`, `~/.gitconfig`, `~/.zshrc`, etc.)
 - A terminal with a [Nerd Font](https://www.nerdfonts.com/) installed for Starship prompt glyphs
@@ -13,34 +14,20 @@ A Docker Compose setup for running [Claude Code](https://github.com/anthropics/c
 
 ```bash
 # Build and start the container
-docker compose up -d --build --remove-orphans
+just rebuild
 
 # Shell into the container
-docker compose -p claude-sandbox exec claude-sandbox zsh
-
-# Run Claude Code directly
-docker compose -p claude-sandbox exec claude-sandbox claude
-
-# Test workflow command
-docker compose down -v && docker compose up -d --build --remove-orphans && docker compose exec claude-sandbox zsh
+just shell
 ```
 
 ## Stopping
 
 ```bash
 # Stop the container
-docker compose down
+just down
 
-# Stop and remove volumes (wipes Claude config)
-docker compose down -v
-```
-
-## Rebuilding
-
-After modifying the `Dockerfile`, `.env`, or to pick up new tool versions:
-
-```bash
-docker compose up -d --build --force-recreate --remove-orphans
+# Stop and remove volumes (wipes config and authentication)
+just reset
 ```
 
 ## Configuration

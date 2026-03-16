@@ -118,9 +118,11 @@ RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} eas-cli@${EA
 #
 # I know this takes a while, but it is actually important
 RUN mkdir -p \
+    /home/${USERNAME}/.cache \
     /home/${USERNAME}/.claude \
     /home/${USERNAME}/.claude-karaconnect \
-    /home/${USERNAME}/.config/gh && \
+    /home/${USERNAME}/.config/gh \
+    /home/${USERNAME}/.config/go && \
   chown -R ${USERNAME}:${USERNAME} \
     /home/${USERNAME}/.bun \
     /home/${USERNAME}/.cache \
